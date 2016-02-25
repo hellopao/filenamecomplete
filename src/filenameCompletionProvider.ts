@@ -7,11 +7,11 @@ import * as vscode from "vscode";
 
 
 function getRange(pos1: vscode.Position, pos2: vscode.Position): vscode.Range {
-    return new vscode.Range(pos1,pos2)
+    return new vscode.Range(pos1, pos2)
 }
 
-function getPosition(line:number,character: number) : vscode.Position {
-    return new vscode.Position(line,character);
+function getPosition(line: number, character: number): vscode.Position {
+    return new vscode.Position(line, character);
 }
 
 /**
@@ -20,50 +20,59 @@ function getPosition(line:number,character: number) : vscode.Position {
  * @param document vscode.TextDocument Document of the activeTextEditor
  * @param position vscode.Position Position of the cursor
  */
-function getPathString(document : vscode.TextDocument,position:vscode.Position) : string {
-    let pathStr : string = "";
-    
+function getPathString(document: vscode.TextDocument, position: vscode.Position): string {
+    let pathStr: string = "";
+
     // right quote position
-    const rCharPos = getPosition(position.line,position.character + 1);
+    const rCharPos = getPosition(position.line, position.character + 1);
     // right quote character
-    const rChar = document.getText(getRange(position,rCharPos));
-    
+    const rChar = document.getText(getRange(position, rCharPos));
+
     var searchIndex = rCharPos.character - 1;
     while (searchIndex > 0) {
-        const searchPos = getPosition(position.line,searchIndex);
-        const searchPosChar = document.getText(getRange(getPosition(position.line,searchIndex - 1),searchPos));
-        
-        if (searchPosChar === rChar) {
-            pathStr = document.getText(getRange(getPosition(position.line,searchIndex),position));
+        const searchPos = getPosition(position.line, searchIndex);
+        const searchPosChar = document.getText(getRange(getPosition(position.line, searchIndex - 1), searchPos));
+
+        if (searchPosChar === rChar || (rChar === ")" && searchPosChar === "(")) {
+            pathStr = document.getText(getRange(getPosition(position.line, searchIndex), position));
             break;
         }
         searchIndex--;
     }
-    
+
     return pathStr;
 }
 
 export default class FilenameCompletionProvider implements vscode.CompletionItemProvider {
-    
-    provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken) {
-        
-        const activeDocument = vscode.window.activeTextEditor.document;
-        
-        return new Promise((resolve,reject) => {
-            var completionItems = [];
-            
-            const activeFilePath = path.dirname(activeDocument.fileName);
-            const pathStr = getPathString(activeDocument,position);
-            
-            fs.readdir(path.join(activeFilePath,pathStr), (err,files) => {
-                if (err) {
-                    reject(completionItems);
-                } else {
-                    completionItems = files.map(file => new vscode.CompletionItem(path.basename(file)));
 
-                    resolve(completionItems);
-                }
-            })
+    provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken) {
+
+        const activeDocument = vscode.window.activeTextEditor.document;
+
+        return new Promise((resolve, reject) => {
+            var completionItems = [];
+
+            const activeFilePath = path.dirname(activeDocument.fileName);
+            const activeLineText = activeDocument.lineAt(position);
+
+            const rChar = document.getText(getRange(position, getPosition(position.line, position.character + 1)));
+            
+            if ((rChar === ")" && /\.(css|less|scss|md)$/.test(activeDocument.fileName))
+                || /\b(include|import|require|href|src)/.test(activeLineText.text)) {
+                const pathStr = getPathString(activeDocument, position);
+
+                fs.readdir(path.join(activeFilePath, pathStr), (err, files) => {
+                    if (err) {
+                        reject(completionItems);
+                    } else {
+                        completionItems = files.map(file => new vscode.CompletionItem(path.basename(file)));
+
+                        resolve(completionItems);
+                    }
+                })
+            } else {
+                return resolve(completionItems);
+            }
         })
     }
 }

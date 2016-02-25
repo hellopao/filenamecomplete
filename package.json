@@ -2,14 +2,26 @@
 	"name": "filenamecomplete",
 	"displayName": "FileNameComplete",
 	"description": "a vscode extension for completing filename",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"publisher": "qinjia",
 	"engines": {
 		"vscode": "^0.10.6"
 	},
-	"categories": [
-		"Other"
-	],
+    "categories": [
+        "Other"
+    ], 
+    "license" : "MIT",
+    "keywords": [
+        "filename complete"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/hellopao/filenamecomplete.git"
+    },
+    "homepage": "https://github.com/hellopao/filenamecomplete",
+    "bugs": {
+        "url": "https://github.com/hellopao/filenamecomplete/issues"
+    },
 	"activationEvents": [
 		"*"
 	],
