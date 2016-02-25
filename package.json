@@ -2,7 +2,8 @@
 	"name": "filenamecomplete",
 	"displayName": "FileNameComplete",
 	"description": "a vscode extension for completing filename",
-	"version": "0.0.2",
+	"version": "0.0.3",
+    "icon": "images/icon.png",
 	"publisher": "qinjia",
 	"engines": {
 		"vscode": "^0.10.6"

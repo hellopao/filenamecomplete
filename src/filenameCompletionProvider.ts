@@ -61,11 +61,14 @@ export default class FilenameCompletionProvider implements vscode.CompletionItem
                 || /\b(include|import|require|href|src)/.test(activeLineText.text)) {
                 const pathStr = getPathString(activeDocument, position);
 
-                fs.readdir(path.join(activeFilePath, pathStr), (err, files) => {
+                const selectPath = path.join(activeFilePath, pathStr);
+                fs.readdir(selectPath, (err, files) => {
                     if (err) {
                         reject(completionItems);
                     } else {
-                        completionItems = files.map(file => new vscode.CompletionItem(path.basename(file)));
+                        completionItems = files
+                            .filter(file => path.join(selectPath,file) !== activeDocument.fileName)
+                            .map(file => new vscode.CompletionItem(path.basename(file)));
 
                         resolve(completionItems);
                     }
